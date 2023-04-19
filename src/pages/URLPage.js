@@ -193,6 +193,7 @@ export default function UserPage() {
     socket.on("scrap_end", inc => {
       toast.dismiss(toastView);
       toast.success('fetched data leads');
+      toast.dismiss();
     });
   }, []);
 
