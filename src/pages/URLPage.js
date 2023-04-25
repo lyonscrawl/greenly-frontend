@@ -48,8 +48,8 @@ const tableIcons = {
   ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />)
 };
 const options = ["SBTI", "CDP", "Ecovadis", "B-Corp"];
-const ENDPOINT = `http://localhost:8080`;
-// const ENDPOINT = "https://greenly-backend.onrender.com"
+// const ENDPOINT = `http://localhost:8080`;
+const ENDPOINT = "https://greenly-backend.onrender.com"
 const socket = openSocket(ENDPOINT, { transports: ['websocket'] });
 
 // ----------------------------------------------------------------------
