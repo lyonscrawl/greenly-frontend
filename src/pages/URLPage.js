@@ -8,7 +8,7 @@ import openSocket from "socket.io-client";
 // components
 import Iconify from '../components/iconify';
 // @mui
-import { Stack, Button, Container, Typography } from '@mui/material';
+import { Stack, Button, Typography } from '@mui/material';
 import AddBox from '@material-ui/icons/AddBox';
 import ArrowDownward from '@material-ui/icons/ArrowDownward';
 import Check from '@material-ui/icons/Check';
@@ -47,27 +47,25 @@ const tableIcons = {
   ThirdStateCheck: forwardRef((props, ref) => <Remove {...props} ref={ref} />),
   ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />)
 };
-const options = ["URL 1", "URL 2", "URL 3", "URL 4"];
-
-// const ENDPOINT = `http://localhost:8080`;
-const ENDPOINT = "https://greenly-backend.onrender.com"
+const options = ["SBTI", "CDP", "Ecovadis", "B-Corp"];
+const ENDPOINT = `http://localhost:8080`;
+// const ENDPOINT = "https://greenly-backend.onrender.com"
 const socket = openSocket(ENDPOINT, { transports: ['websocket'] });
 
 // ----------------------------------------------------------------------
 
 export default function UserPage() {
 
-  let result = []
   let toastView;
 
   const [colDefs, setColDefs] = useState([
     { title: "isNew", field: "isNew", lookup: { "yes": "yes" } },
     { title: "Entreprise", field: "Entreprise", filtering: false },
-    { title: "Domaine Web Entreprise", field: "Domaine Web Entreprise", filtering: false },
     { title: "Prenom", field: "Prenom", filtering: false },
     { title: "Nom", field: "Nom", filtering: false },
     { title: "Poste", field: "Poste" },
     { title: "URL Profil Linkedin", field: "URL Profil Linkedin", filtering: false },
+    { title: "Domaine Web Entreprise", field: "Domaine Web Entreprise", filtering: false },
     { title: "Email", field: "Email", filtering: false },
     { title: "Telephone", field: "Telephone", filtering: false },
   ])
@@ -104,7 +102,6 @@ export default function UserPage() {
         rowData[headers[index]] = element
       })
       rows.push(rowData)
-
     });
     return rows
   }
@@ -138,7 +135,7 @@ export default function UserPage() {
         (head) => {
           if(head === "isNew"){
             return ({ title: head, field: head, lookup: { "yes": "yes" } })
-          } else if (head === "poste"){
+          } else if (head === "Poste"){
             return ({ title: head, field: head })
           } else{
             return ({ title: head, field: head, filtering: false })
@@ -167,15 +164,6 @@ export default function UserPage() {
 
   // SCRAP
   function fetchData() {
-    if(fileName.toLocaleLowerCase().includes("bcorporation")){
-      setSelectedOption(options[0])
-    } else if(fileName.toLocaleLowerCase().includes("bcorporation")){
-      setSelectedOption(options[1])
-    } else if(fileName.toLocaleLowerCase().includes("bcorporation")){
-      setSelectedOption(options[2])
-    } else if(fileName.toLocaleLowerCase().includes("bcorporation")){
-      setSelectedOption(options[3])
-    }
     socket.emit("get_scrap", selectedOption)
   }
   const getScrap = () => {
@@ -186,16 +174,36 @@ export default function UserPage() {
   // USE EFFECT
   useEffect(() => {
     socket.on("scrap_result", result => {
-      setData(result);
-      const count = result.filter(item => item.isNew === 'yes').length;
-      setNewLead(count)
+      if(!fileName.toLocaleLowerCase().includes("Scrap / Load CSV file")){
+        if(result.length !== 0){
+          let arr = []
+          for(let r in result){
+            let tmp = false
+            for(let d in data){
+              if(r["URL Profil Linkedin"] === d["URL Profil Linkedin"]){
+                tmp = true
+                break;
+              }
+            }
+            if(tmp === false){
+              arr.push(r)
+            }
+          }
+          const count = arr.filter(item => item.isNew === 'yes').length;
+          setNewLead(count)
+        }
+      } else {
+        setData(result);
+        const count = result.filter(item => item.isNew === 'yes').length;
+        setNewLead(count)
+      }
     });
     socket.on("scrap_end", inc => {
       toast.dismiss(toastView);
       toast.success('fetched data leads');
       toast.dismiss();
     });
-  }, []);
+  }, [data, fileName, toastView]);
 
   return (
     <>
