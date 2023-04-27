@@ -74,6 +74,7 @@ export default function UserPage() {
   const [newLead, setNewLead] = useState(0)
   const [fileName, setFileName] = useState("Scrap / Load CSV file")
   const inputRef = useRef(null)
+  const [scrapVal, setScrapVal] = useState("Scrap")
 
   // Select URL SCrap
   const handleChange = (event) => {
@@ -167,14 +168,21 @@ export default function UserPage() {
     socket.emit("get_scrap", selectedOption)
   }
   const getScrap = () => {
-    fetchData()
-    toastView = toast.loading('Scraping new leads of ' + selectedOption + '...\nThis can take a while, about 3 hours !')
+    if(scrapVal === "Scrap"){
+      setScrapVal("Stop Scrap")
+      fetchData()
+      toastView = toast.loading('Scraping new leads of ' + selectedOption + '...\nThis can take a while, about 3 hours !')
+    } else {
+      socket.emit("stop_scrap", selectedOption)
+      setScrapVal("Scrap")
+    }
+    
   }
 
   // USE EFFECT
   useEffect(() => {
     socket.on("scrap_result", result => {
-      if(!fileName.toLocaleLowerCase().includes("Scrap / Load CSV file")){
+      if(!fileName.includes("Scrap / Load CSV file")){
         if(result.length !== 0){
           let arr = []
           for(let r in result){
@@ -241,7 +249,7 @@ export default function UserPage() {
             </select>
               
             <Button onClick={getScrap} variant="contained" color="error" startIcon={<Iconify icon="ic:baseline-search" />} style={{marginRight:10}}>
-              Scrap
+              {scrapVal}
             </Button>
 
             <Button onClick={handleClick} variant="contained" color="info" startIcon={<Iconify icon="game-icons:load" />} style={{marginRight:10}}>
