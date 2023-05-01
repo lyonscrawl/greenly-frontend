@@ -48,7 +48,7 @@ const tableIcons = {
   ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />)
 };
 const options = ["SBTI", "CDP", "Ecovadis", "B-Corp"];
-// const ENDPOINT = `http://localhost:8080`;
+// const ENDPOINT = "http://localhost:8080";
 const ENDPOINT = "https://greenly-backend.onrender.com"
 const socket = openSocket(ENDPOINT, { transports: ['websocket'] });
 
@@ -59,13 +59,18 @@ export default function UserPage() {
   let toastView;
 
   const [colDefs, setColDefs] = useState([
+    { title: "URL", field: "URL", lookup: { "SBTI": options[0], "CDP": options[1], "Ecovadis": options[2], "B-Corp": options[3] } },
     { title: "isNew", field: "isNew", lookup: { "yes": "yes" } },
     { title: "Entreprise", field: "Entreprise", filtering: false },
-    { title: "Prenom", field: "Prenom", filtering: false },
-    { title: "Nom", field: "Nom", filtering: false },
+    { title: "Localisation", field: "Localisation" },
+    { title: "Industrie", field: "Industrie"},
+    { title: "Taille", field: "Taille" },
+    { title: "URL Linkedin", field: "URL Linkedin", filtering: false },
+    { title: "Prenom", field: "Prenom" },
+    { title: "Nom", field: "Nom" },
     { title: "Poste", field: "Poste" },
-    { title: "URL Profil Linkedin", field: "URL Profil Linkedin", filtering: false },
-    { title: "Domaine Web Entreprise", field: "Domaine Web Entreprise", filtering: false },
+    { title: "Profil Linkedin", field: "Profil Linkedin", filtering: false },
+    { title: "Domaine Web", field: "Domaine Web", filtering: false },
     { title: "Email", field: "Email", filtering: false },
     { title: "Telephone", field: "Telephone", filtering: false },
   ])
@@ -74,7 +79,8 @@ export default function UserPage() {
   const [newLead, setNewLead] = useState(0)
   const [fileName, setFileName] = useState("Scrap / Load CSV file")
   const inputRef = useRef(null)
-  const [scrapVal, setScrapVal] = useState("Scrap")
+  const [scrapVal, setScrapVal] = useState("Scrap all datas")
+  const [scrapCompVal, setScrapCompVal] = useState("Scrap all companies")
 
   // Select URL SCrap
   const handleChange = (event) => {
@@ -164,19 +170,26 @@ export default function UserPage() {
   }
 
   // SCRAP
-  function fetchData() {
-    socket.emit("get_scrap", selectedOption)
-  }
   const getScrap = () => {
-    if(scrapVal === "Scrap"){
+    if(scrapVal === "Scrap all datas"){
       setScrapVal("Stop Scrap")
-      fetchData()
+      socket.emit("get_scrap", selectedOption)
       toastView = toast.loading('Scraping new leads of ' + selectedOption + '...\nThis can take a while, about 3 hours !')
     } else {
       socket.emit("stop_scrap", selectedOption)
-      setScrapVal("Scrap")
+      setScrapVal("Scrap all datas")
     }
-    
+  }
+
+  const getCompScrap = () => {
+    if(scrapCompVal === "Scrap all companies"){
+      setScrapCompVal("Stop Scrap")
+      socket.emit("get_comp_scrap", selectedOption)
+      toastView = toast.loading('Scraping companies of ' + selectedOption + '...\nThis can take a while, about 1 hour !')
+    } else {
+      socket.emit("stop_scrap", selectedOption)
+      setScrapCompVal("Scrap all companies")
+    }
   }
 
   // USE EFFECT
@@ -228,7 +241,7 @@ export default function UserPage() {
             (newLead <=0 ) ?
               null
               :
-              <div><span style={{color:"red", fontWeight:"bold"}}>{newLead}</span> new leads discovered</div> 
+              <div><span style={{color:"red", fontWeight:"bold"}}>{newLead}</span> new discovered</div> 
           }
           
           <Stack direction="row" alignItems="center" justifyContent="space-between">
@@ -247,6 +260,10 @@ export default function UserPage() {
                 </option>
               ))}
             </select>
+
+            <Button onClick={getCompScrap} variant="outlined" color="error" startIcon={<Iconify icon="ic:baseline-search" />} style={{marginRight:10}}>
+              {scrapCompVal}
+            </Button>
               
             <Button onClick={getScrap} variant="contained" color="error" startIcon={<Iconify icon="ic:baseline-search" />} style={{marginRight:10}}>
               {scrapVal}
