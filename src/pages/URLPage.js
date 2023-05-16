@@ -48,6 +48,7 @@ const tableIcons = {
   ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />)
 };
 const options = ["SBTI", "CDP", "Ecovadis", "B-Corp", "Test 5 of SBTI"];
+const optionsICP = ["P1 - Persona Sustainability", "P2 - Persona CEO/COO/Legal", "P3 - Persona RH & Marketing"];
 // const ENDPOINT = "http://localhost:8080";
 const ENDPOINT = "https://greenly-backend.onrender.com"
 const socket = openSocket(ENDPOINT, { transports: ['websocket'] });
@@ -63,6 +64,7 @@ export default function UserPage() {
     { title: "isNew", field: "isNew", lookup: { "yes": "yes" } },
     { title: "Entreprise", field: "Entreprise", filtering: false },
     { title: "Localisation", field: "Localisation" },
+    { title: "Geographie Greenly", field: "Geographie Greenly" },
     { title: "Industrie", field: "Industrie"},
     { title: "Taille", field: "Taille" },
     { title: "URL Linkedin", field: "URL Linkedin", filtering: false },
@@ -78,11 +80,15 @@ export default function UserPage() {
     return { ...column };
   });
   const [selectedOption, setSelectedOption] = useState(options[0])
+  const [selectedOptionICP, setSelectedOptionICP] = useState(optionsICP[0])
   const [data, setData] = useState([])
   const [fileData, setFileData] = useState([])
   const [newLead, setNewLead] = useState(0)
   const [fileName, setFileName] = useState("Scrap / Load CSV file")
   const [isFile, setIsFile] = useState({val: false})
+  const [isScraping, setIsScraping] = useState(false)
+  const [isScrapingVal, setIsScrapingVal] = useState(false)
+  const [isScrapingComp, setIsScrapingComp] = useState(false)
   const inputRef = useRef(null)
   const [scrapVal, setScrapVal] = useState("Scrap all datas")
   const [scrapCompVal, setScrapCompVal] = useState("Scrap all companies")
@@ -90,6 +96,11 @@ export default function UserPage() {
   // Select URL SCrap
   const handleChange = (event) => {
     setSelectedOption(event.target.value);
+  };
+
+  // Select ICP SCrap
+  const handleChangeICP = (event) => {
+    setSelectedOptionICP(event.target.value);
   };
 
   // Capitalize
@@ -168,11 +179,23 @@ export default function UserPage() {
       // setData([])
       // setNewLead(0)
       setScrapVal("Stop Scrap")
-      socket.emit("get_scrap", selectedOption)
+      setIsScraping(true)
+      setIsScrapingComp(true)
+      setIsScrapingVal(false)
+      socket.emit("get_scrap", {
+        "selectedOption" : selectedOption,
+        "selectedOptionICP" : selectedOptionICP,
+      })
       toastView = toast.loading('Scraping new leads of ' + selectedOption + '...\nThis can take a while, about 3 hours !')
     } else {
-      socket.emit("stop_scrap", selectedOption)
+      socket.emit("stop_scrap", {
+        "selectedOption" : selectedOption,
+        "selectedOptionICP" : selectedOptionICP,
+      })
       setScrapVal("Scrap all datas")
+      setIsScraping(false)
+      setIsScrapingComp(false)
+      setIsScrapingVal(false)
       setIsFile({val: false})
     }
   }
@@ -182,11 +205,23 @@ export default function UserPage() {
       // setData([])
       // setNewLead(0)
       setScrapCompVal("Stop Scrap")
-      socket.emit("get_comp_scrap", selectedOption)
+      setIsScraping(true)
+      setIsScrapingComp(false)
+      setIsScrapingVal(true)
+      socket.emit("get_comp_scrap", {
+        "selectedOption" : selectedOption,
+        "selectedOptionICP" : selectedOptionICP,
+      })
       toastView = toast.loading('Scraping companies of ' + selectedOption + '...\nThis can take a while, about 1 hour !')
     } else {
-      socket.emit("stop_scrap", selectedOption)
+      socket.emit("stop_scrap", {
+        "selectedOption" : selectedOption,
+        "selectedOptionICP" : selectedOptionICP,
+      })
       setScrapCompVal("Scrap all companies")
+      setIsScraping(false)
+      setIsScrapingComp(false)
+      setIsScrapingVal(false)
       setIsFile({val: false})
     }
   }
@@ -257,7 +292,15 @@ export default function UserPage() {
               onChange={importExcel}
             />
 
-            <select id="combo-box" value={selectedOption} onChange={handleChange} style={{marginRight:10}}>
+            <select id="combo-box-icp" value={selectedOptionICP} disabled={isScraping} onChange={handleChangeICP} style={{marginRight:10}}>
+              {optionsICP.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+
+            <select id="combo-box" value={selectedOption} disabled={isScraping} onChange={handleChange} style={{marginRight:10}}>
               {options.map((option) => (
                 <option key={option} value={option}>
                   {option}
@@ -265,19 +308,19 @@ export default function UserPage() {
               ))}
             </select>
 
-            <Button onClick={getCompScrap} variant="outlined" color="error" startIcon={<Iconify icon="ic:baseline-search" />} style={{marginRight:10}}>
+            <Button onClick={getCompScrap} disabled={isScrapingComp} variant="outlined" color="error" startIcon={<Iconify icon="ic:baseline-search" />} style={{marginRight:10}}>
               {scrapCompVal}
             </Button>
               
-            <Button onClick={getScrap} variant="contained" color="error" startIcon={<Iconify icon="ic:baseline-search" />} style={{marginRight:10}}>
+            <Button onClick={getScrap} disabled={isScrapingVal} variant="contained" color="error" startIcon={<Iconify icon="ic:baseline-search" />} style={{marginRight:10}}>
               {scrapVal}
             </Button>
 
-            <Button onClick={handleClick} variant="contained" color="info" startIcon={<Iconify icon="game-icons:load" />} style={{marginRight:10}}>
+            <Button onClick={handleClick} disabled={isScraping} variant="contained" color="info" startIcon={<Iconify icon="game-icons:load" />} style={{marginRight:10}}>
               Load CSV File
             </Button>
             
-            <Button variant="contained" color="warning" startIcon={<Iconify icon="carbon:data-enrichment-add" />}>
+            <Button variant="contained" disabled={true} color="warning" startIcon={<Iconify icon="carbon:data-enrichment-add" />}>
               Enrich
             </Button>
           </Stack>
