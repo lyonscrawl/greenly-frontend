@@ -257,6 +257,9 @@ export default function UserPage() {
     socket.on("scrap_end", inc => {
       setScrapCompVal("Scrap all companies")
       setScrapVal("Scrap all datas")
+      setIsScraping(false)
+      setIsScrapingComp(false)
+      setIsScrapingVal(false)
       setFileName("Scrap / Load CSV file")
       setIsFile({val: false})
       toast.dismiss(toastView);
