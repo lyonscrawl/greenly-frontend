@@ -61,7 +61,7 @@ export default function UserPage() {
 
   const colDefs = [
     { title: "URL", field: "URL", lookup: { "SBTI": options[0], "CDP": options[1], "Ecovadis": options[2], "B-Corp": options[3], "Test 5 of SBTI": options[4] } },
-    { title: "isNew", field: "isNew", lookup: { "yes": "New", "": "Old", "notfound": "Lead Not Found" } },
+    { title: "isNew", field: "isNew", lookup: { "yes": "New", "": "Old", "notfound": "Not Found" } },
     { title: "Entreprise", field: "Entreprise", filtering: false },
     { title: "Localisation", field: "Localisation" },
     { title: "Geographie Greenly", field: "Geographie Greenly" },
@@ -85,14 +85,15 @@ export default function UserPage() {
   const [fileData, setFileData] = useState([])
   const [newLead, setNewLead] = useState(0)
   const [notFoundLead, setNotFoundLead] = useState(0)
-  const [fileName, setFileName] = useState("Scrap / Load CSV file")
+  const [fileName, setFileName] = useState("")
   const [isFile, setIsFile] = useState({val: false})
   const [isScraping, setIsScraping] = useState(false)
   const [isScrapingVal, setIsScrapingVal] = useState(false)
   const [isScrapingComp, setIsScrapingComp] = useState(false)
   const inputRef = useRef(null)
-  const [scrapVal, setScrapVal] = useState("Scrap all datas")
-  const [scrapCompVal, setScrapCompVal] = useState("Scrap all companies")
+  const [scrapVal, setScrapVal] = useState("Scrap datas")
+  const [scrapCompVal, setScrapCompVal] = useState("Scrap companies")
+  const [debVal, setDebVal] = useState(0)
 
   // Select URL SCrap
   const handleChange = (event) => {
@@ -136,6 +137,13 @@ export default function UserPage() {
     setIsFile({val: true})
   };
 
+  const viderTable = () => {
+    setData([])
+    setDebVal(0)
+    setNewLead(0)
+    setNotFoundLead(0)
+  };
+
   const importExcel = (e) => {
     const file = e.target.files[0]
     setFileName(capitalizeWords(file.name.split(".csv")[0]))
@@ -158,7 +166,7 @@ export default function UserPage() {
       //removing header
       fileData.splice(0, 1)
       let tmp = convertToJson(headers, fileData)
-      tmp.forEach((item) => { item.isNew = ""})
+      tmp.forEach((item) => { (item.isNew === "Not Found") ? item.isNew="notfound" : item.isNew = ""})
       setData(tmp)
       setFileData(tmp)
     }
@@ -177,7 +185,7 @@ export default function UserPage() {
 
   // SCRAP
   const getScrap = () => {
-    if(scrapVal === "Scrap all datas"){
+    if(scrapVal === "Scrap datas"){
       // setData([])
       // setNewLead(0)
       setScrapVal("Stop Scrap")
@@ -187,14 +195,12 @@ export default function UserPage() {
       socket.emit("get_scrap", {
         "selectedOption" : selectedOption,
         "selectedOptionICP" : selectedOptionICP,
+        "debVal": debVal
       })
       toastView = toast.loading('Scraping new leads of ' + selectedOption + '...\nThis can take a while, about 3 hours !')
     } else {
-      socket.emit("stop_scrap", {
-        "selectedOption" : selectedOption,
-        "selectedOptionICP" : selectedOptionICP,
-      })
-      setScrapVal("Scrap all datas")
+      socket.emit("stop_scrap")
+      setScrapVal("Scrap datas")
       setIsScraping(false)
       setIsScrapingComp(false)
       setIsScrapingVal(false)
@@ -203,7 +209,7 @@ export default function UserPage() {
   }
 
   const getCompScrap = () => {
-    if(scrapCompVal === "Scrap all companies"){
+    if(scrapCompVal === "Scrap companies"){
       // setData([])
       // setNewLead(0)
       setScrapCompVal("Stop Scrap")
@@ -213,14 +219,12 @@ export default function UserPage() {
       socket.emit("get_comp_scrap", {
         "selectedOption" : selectedOption,
         "selectedOptionICP" : selectedOptionICP,
+        "debVal": debVal
       })
       toastView = toast.loading('Scraping companies of ' + selectedOption + '...\nThis can take a while, about 1 hour !')
     } else {
-      socket.emit("stop_scrap", {
-        "selectedOption" : selectedOption,
-        "selectedOptionICP" : selectedOptionICP,
-      })
-      setScrapCompVal("Scrap all companies")
+      socket.emit("stop_scrap")
+      setScrapCompVal("Scrap companies")
       setIsScraping(false)
       setIsScrapingComp(false)
       setIsScrapingVal(false)
@@ -230,8 +234,26 @@ export default function UserPage() {
 
   // USE EFFECT
   useEffect(() => {
-    socket.on("scrap_result", result => {
-      if(isFile.val === true){
+    socket.on("scrap_result", ({result, deb}) => {
+      if(result.length !== 0){
+        const uniqueValues = result.filter(arr22Item => {
+          return !data.some(arr11Item => {
+            return arr22Item.URL === arr11Item.URL &&
+                   arr22Item.Entreprise === arr11Item.Entreprise 
+                  // && arr22Item["URL Linkedin"] === arr11Item["URL Linkedin"]
+                  //  arr22Item.Industrie === arr11Item.Industrie 
+                  // && arr22Item.isNew === arr11Item.isNew
+          })
+        })
+        const combinedArray = [...data, ...uniqueValues];
+        setData(combinedArray);
+        const count = combinedArray.filter(item => item.isNew === 'yes').length;
+        const countNotFound = combinedArray.filter(item => item.isNew === 'notfound').length;
+        setNewLead(count)
+        setNotFoundLead(countNotFound)
+        setDebVal(deb)
+      }
+      /*if(isFile.val === true){
         // console.log("file")
         if(result.length !== 0){
           const uniqueValues = result.filter(arr22Item => {
@@ -249,25 +271,27 @@ export default function UserPage() {
           const countNotFound = combinedArray.filter(item => item.isNew === 'notfound').length;
           setNewLead(count)
           setNotFoundLead(countNotFound)
+          setDebVal(deb)
         }
       } else {
-        // console.log("hey")
-        setData(result);
-        const count = result.filter(item => item.isNew === 'yes').length;
-        const countNotFound = result.filter(item => item.isNew === 'notfound').length;
-        setNewLead(count)
-        setNotFoundLead(countNotFound)
-      }
+        // setData(result);
+        // const count = result.filter(item => item.isNew === 'yes').length;
+        // const countNotFound = result.filter(item => item.isNew === 'notfound').length;
+        // setNewLead(count)
+        // setNotFoundLead(countNotFound)
+        // setDebVal(deb)
+      }*/
     }, []);
     
-    socket.on("scrap_end", inc => {
-      setScrapCompVal("Scrap all companies")
-      setScrapVal("Scrap all datas")
+    socket.on("scrap_end", () => {
+      setScrapCompVal("Scrap companies")
+      setScrapVal("Scrap datas")
       setIsScraping(false)
       setIsScrapingComp(false)
       setIsScrapingVal(false)
       setFileName("Scrap / Load CSV file")
       setIsFile({val: false})
+      // setDebVal(0)
       toast.dismiss(toastView);
       toast.success('fetched data leads');
       toast.dismiss();
@@ -283,7 +307,7 @@ export default function UserPage() {
       <div>
         <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
           <Typography variant="h4" gutterBottom>
-            {fileName}
+            {"Scrap / Load CSV file"}
           </Typography>
 
           <Stack direction="column" alignItems="center" justifyContent="space-between">
@@ -304,21 +328,34 @@ export default function UserPage() {
               onChange={importExcel}
             />
 
-            <select id="combo-box-icp" value={selectedOptionICP} disabled={isScraping} onChange={handleChangeICP} style={{marginRight:10}}>
-              {optionsICP.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
+            {/* <Stack direction="column" alignItems="center" justifyContent="space-between"> */}
+              <select id="combo-box-icp" value={selectedOptionICP} disabled={isScraping} onChange={handleChangeICP} style={{marginRight:10}}>
+                {optionsICP.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
 
-            <select id="combo-box" value={selectedOption} disabled={isScraping} onChange={handleChange} style={{marginRight:10}}>
-              {options.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
+              <select id="combo-box" value={selectedOption} disabled={isScraping} onChange={handleChange} style={{marginRight:10}}>
+                {options.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            {/* </Stack> */}
+
+            <input
+                type='number'
+                min={0}
+                max={10000}
+                inputMode='numeric'
+                style={{marginRight:"10px"}}
+                pattern='[0-9]{0,5}'
+                onChange= {(e) => {setDebVal(parseInt(e.target.value) ? parseInt(e.target.value) : 0)}}
+                value={debVal}
+            />
 
             <Button onClick={getCompScrap} disabled={isScrapingComp} variant="outlined" color="error" startIcon={<Iconify icon="ic:baseline-search" />} style={{marginRight:10}}>
               {scrapCompVal}
@@ -332,8 +369,8 @@ export default function UserPage() {
               Load CSV File
             </Button>
             
-            <Button variant="contained" disabled={true} color="warning" startIcon={<Iconify icon="carbon:data-enrichment-add" />}>
-              Enrich
+            <Button onClick={viderTable} variant="contained" disabled={isScraping} color="warning" startIcon={<Iconify icon="gridicons:trash" />}>
+              Vider
             </Button>
           </Stack>
         </Stack>
