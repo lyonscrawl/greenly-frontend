@@ -391,16 +391,16 @@ export default function UserPage() {
             title={
               <Stack direction="row" alignItems="center" justifyContent="space-between">
                 {
-                  (fileName === "" ) ? null : <div><span style={{color:"black", fontWeight:"bold", marginRight:10}}>« {fileName}.csv »</span></div>
+                  (fileName === "" ) ? null : <div style={{ marginRight:10}}><span style={{color:"black", fontWeight:"bold"}}>« {fileName}.csv »</span></div>
                 }
                 {
-                  (newLead <=0 ) ? null : <div><span style={{color:"blue", fontWeight:"bold", marginRight:10}}>{newLead}</span> new leads discovered</div>
+                  (newLead <=0 ) ? null : <div style={{ marginRight:10}}><span style={{color:"blue", fontWeight:"bold"}}>{newLead}</span> new leads discovered</div>
                 }
                 {
-                  (notFoundLead <=0 ) ? null : <div><span style={{color:"red", fontWeight:"bold", marginRight:10}}>{notFoundLead}</span> companies to review</div> 
+                  (notFoundLead <=0 ) ? null : <div style={{ marginRight:10}}><span style={{color:"red", fontWeight:"bold"}}>{notFoundLead}</span> companies to review</div> 
                 }
                 {
-                  (!scrapError) ? null : <div><span style={{color:"white", fontWeight:"bold", backgroundColor: "red", marginRight:10}}>{"Error 429 : Too Many Requests"}</span></div> 
+                  (!scrapError) ? null : <div style={{ marginRight:10}}><span style={{color:"white", fontWeight:"bold", backgroundColor: "red"}}>{"Error 429 : Too Many Requests"}</span></div> 
                 }
               </Stack>
             }
