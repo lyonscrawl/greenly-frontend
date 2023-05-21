@@ -355,6 +355,7 @@ export default function UserPage() {
                 pattern='[0-9]{0,5}'
                 onChange= {(e) => {setDebVal(parseInt(e.target.value) ? parseInt(e.target.value) : 0)}}
                 value={debVal}
+                disabled={isScraping}
             />
 
             <Button onClick={getCompScrap} disabled={isScrapingComp} variant="outlined" color="error" startIcon={<Iconify icon="ic:baseline-search" />} style={{marginRight:10}}>
