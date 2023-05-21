@@ -292,7 +292,7 @@ export default function UserPage() {
       setIsScraping(false)
       setIsScrapingComp(false)
       setIsScrapingVal(false)
-      setFileName("Scrap / Load CSV file")
+      setFileName("")
       setIsFile({val: false})
       // setDebVal(0)
       toast.dismiss(toastView);
@@ -317,7 +317,7 @@ export default function UserPage() {
             {"Scrap / Load CSV file"}
           </Typography>
 
-          <Stack direction="column" alignItems="center" justifyContent="space-between">
+          {/* <Stack direction="column" alignItems="center" justifyContent="space-between">
             {
               (newLead <=0 ) ? null : <div><span style={{color:"blue", fontWeight:"bold"}}>{newLead}</span> new leads discovered</div>
             }
@@ -327,7 +327,7 @@ export default function UserPage() {
             {
               (!scrapError) ? null : <div><span style={{color:"white", fontWeight:"bold", backgroundColor: "red"}}>{"Error 429 : Too Many Requests"}</span></div> 
             }
-          </Stack>
+          </Stack> */}
 
           <Stack direction="row" alignItems="center" justifyContent="space-between">
             <input
@@ -388,7 +388,22 @@ export default function UserPage() {
 
         <div style={{}}>
           <MaterialTable 
-            title={fileName}
+            title={
+              <Stack direction="row" alignItems="center" justifyContent="space-between">
+                {
+                  (fileName === "" ) ? null : <div>{fileName}</div>
+                }
+                {
+                  (newLead <=0 ) ? null : <div><span style={{color:"blue", fontWeight:"bold"}}>{newLead}</span> new leads discovered</div>
+                }
+                {
+                  (notFoundLead <=0 ) ? null : <div><span style={{color:"red", fontWeight:"bold"}}>{notFoundLead}</span> companies to review</div> 
+                }
+                {
+                  (!scrapError) ? null : <div><span style={{color:"white", fontWeight:"bold", backgroundColor: "red"}}>{"Error 429 : Too Many Requests"}</span></div> 
+                }
+              </Stack>
+            }
             data={data} 
             columns={columns}
             icons={tableIcons}
