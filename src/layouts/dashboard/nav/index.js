@@ -14,6 +14,11 @@ import Scrollbar from '../../../components/scrollbar';
 import NavSection from '../../../components/nav-section';
 //
 import navConfig from './config';
+import { useNavigate } from 'react-router-dom';
+import openSocket from "socket.io-client";
+// const ENDPOINT = "http://localhost:8080";
+const ENDPOINT = "https://greenly-backend.onrender.com"
+const socket = openSocket(ENDPOINT, { transports: ['websocket'] });
 
 // ----------------------------------------------------------------------
 
@@ -36,6 +41,7 @@ Nav.propTypes = {
 
 export default function Nav({ openNav, onCloseNav }) {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
 
   const isDesktop = useResponsive('up', 'lg');
 
@@ -79,6 +85,8 @@ export default function Nav({ openNav, onCloseNav }) {
 
       <Box sx={{ flexGrow: 1 }} />
 
+      
+
       <Box sx={{ px: 2.5, pb: 3, mt: 10 }}>
         <Stack alignItems="center" spacing={3} sx={{ pt: 5, borderRadius: 2, position: 'relative' }}>
           {/* <Box
@@ -102,6 +110,9 @@ export default function Nav({ openNav, onCloseNav }) {
 
           <Button href="https://greenly.earth/fr-fr" target="_blank" variant="outlined">
             © Greenly, 2023
+          </Button>
+          <Button color='error' target="_blank" variant="outlined" onClick={() => {socket.disconnect(); navigate('/');}}>
+            Se Déconnecter
           </Button>
         </Stack>
       </Box>

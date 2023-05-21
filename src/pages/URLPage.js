@@ -48,7 +48,7 @@ const tableIcons = {
   ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />)
 };
 const options = ["SBTI", "CDP", "Ecovadis", "B-Corp", "Test 5 of SBTI"];
-const optionsICP = ["P1 - Persona Sustainability", "P2 - Persona CEO/COO/Legal", "P3 - Persona RH & Marketing"];
+const optionsICP = ["All - P1 + P2 + P3", "P1 - Persona Sustainability", "P2 - Persona CEO/COO/Legal", "P3 - Persona RH & Marketing"];
 // const ENDPOINT = "http://localhost:8080";
 const ENDPOINT = "https://greenly-backend.onrender.com"
 const socket = openSocket(ENDPOINT, { transports: ['websocket'] });
@@ -61,7 +61,7 @@ export default function UserPage() {
 
   const colDefs = [
     { title: "URL", field: "URL", lookup: { "SBTI": options[0], "CDP": options[1], "Ecovadis": options[2], "B-Corp": options[3], "Test 5 of SBTI": options[4] } },
-    { title: "isNew", field: "isNew", lookup: { "yes": "yes" } },
+    { title: "isNew", field: "isNew", lookup: { "yes": "New", "": "Old", "notfound": "Lead Not Found" } },
     { title: "Entreprise", field: "Entreprise", filtering: false },
     { title: "Localisation", field: "Localisation" },
     { title: "Geographie Greenly", field: "Geographie Greenly" },
@@ -84,6 +84,7 @@ export default function UserPage() {
   const [data, setData] = useState([])
   const [fileData, setFileData] = useState([])
   const [newLead, setNewLead] = useState(0)
+  const [notFoundLead, setNotFoundLead] = useState(0)
   const [fileName, setFileName] = useState("Scrap / Load CSV file")
   const [isFile, setIsFile] = useState({val: false})
   const [isScraping, setIsScraping] = useState(false)
@@ -139,6 +140,7 @@ export default function UserPage() {
     const file = e.target.files[0]
     setFileName(capitalizeWords(file.name.split(".csv")[0]))
     setNewLead(0)
+    setNotFoundLead(0)
     setIsFile({val: true})
 
     const reader = new FileReader()
@@ -244,13 +246,17 @@ export default function UserPage() {
           const combinedArray = [...data, ...uniqueValues];
           setData(combinedArray);
           const count = combinedArray.filter(item => item.isNew === 'yes').length;
+          const countNotFound = combinedArray.filter(item => item.isNew === 'notfound').length;
           setNewLead(count)
+          setNotFoundLead(countNotFound)
         }
       } else {
         // console.log("hey")
         setData(result);
         const count = result.filter(item => item.isNew === 'yes').length;
+        const countNotFound = result.filter(item => item.isNew === 'notfound').length;
         setNewLead(count)
+        setNotFoundLead(countNotFound)
       }
     }, []);
     
@@ -279,13 +285,16 @@ export default function UserPage() {
           <Typography variant="h4" gutterBottom>
             {fileName}
           </Typography>
-          {
-            (newLead <=0 ) ?
-              null
-              :
-              <div><span style={{color:"red", fontWeight:"bold"}}>{newLead}</span> new discovered</div> 
-          }
-          
+
+          <Stack direction="column" alignItems="center" justifyContent="space-between">
+            {
+              (newLead <=0 ) ? null : <div><span style={{color:"blue", fontWeight:"bold"}}>{newLead}</span> new leads discovered</div>
+            }
+            {
+              (notFoundLead <=0 ) ? null : <div><span style={{color:"red", fontWeight:"bold"}}>{notFoundLead}</span> companies to review</div> 
+            }
+          </Stack>
+
           <Stack direction="row" alignItems="center" justifyContent="space-between">
             <input
               style={{display: 'none'}}
@@ -342,7 +351,7 @@ export default function UserPage() {
               searchAutoFocus: true,
               filtering: true,
               rowStyle: rowData => ({
-                backgroundColor: (rowData.isNew === "yes") ? 'skyblue' : '#FFF'
+                backgroundColor: (rowData.isNew === "yes") ? 'skyblue' : (rowData.isNew === "notfound") ? 'pink' : 'white'
               })
               //selection: true
             }}

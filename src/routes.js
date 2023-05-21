@@ -13,7 +13,7 @@ import DashboardAppPage from './pages/DashboardAppPage';
 export default function Router() {
   const routes = useRoutes([
     {
-      path: '/dashboard',
+      path: 'dashboard',
       element: <DashboardLayout />,
       children: [
         { element: <Navigate to="/dashboard/url" />, index: true }, // dashboard/app

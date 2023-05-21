@@ -11,11 +11,11 @@ const navConfig = [
     path: '/dashboard/url', // app
     icon: icon('ic_analytics'),
   },
-  {
-    title: 'Déconnexion',
-    path: '/login',
-    icon: icon('ic_lock'),
-  },
+  // {
+  //   title: 'Déconnexion',
+  //   path: '/login',
+  //   icon: icon('ic_lock'),
+  // },
 ];
 
 export default navConfig;
