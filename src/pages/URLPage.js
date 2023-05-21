@@ -345,7 +345,8 @@ export default function UserPage() {
             columns={columns}
             icons={tableIcons}
             options={{
-              exportButton: true,  
+              exportButton: true,
+              exportAllData: true,
               pageSize: 10,
               pageSizeOptions: [10, 20, 50],
               searchAutoFocus: true,
