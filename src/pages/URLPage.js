@@ -325,7 +325,7 @@ export default function UserPage() {
               (notFoundLead <=0 ) ? null : <div><span style={{color:"red", fontWeight:"bold"}}>{notFoundLead}</span> companies to review</div> 
             }
             {
-              (!scrapError) ? null : <div><span style={{color:"white", fontWeight:"bold", backgroundColor: "red"}}>{notFoundLead}</span> Error 429 : Too Many Requests</div> 
+              (!scrapError) ? null : <div><span style={{color:"white", fontWeight:"bold", backgroundColor: "red"}}>{"Error 429 : Too Many Requests"}</span></div> 
             }
           </Stack>
 
