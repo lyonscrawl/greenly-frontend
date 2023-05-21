@@ -90,6 +90,7 @@ export default function UserPage() {
   const [isScraping, setIsScraping] = useState(false)
   const [isScrapingVal, setIsScrapingVal] = useState(false)
   const [isScrapingComp, setIsScrapingComp] = useState(false)
+  const [scrapError, setScrapError] = useState(false)
   const inputRef = useRef(null)
   const [scrapVal, setScrapVal] = useState("Scrap datas")
   const [scrapCompVal, setScrapCompVal] = useState("Scrap companies")
@@ -189,6 +190,7 @@ export default function UserPage() {
       // setData([])
       // setNewLead(0)
       setScrapVal("Stop Scrap")
+      setScrapError(false)
       setIsScraping(true)
       setIsScrapingComp(true)
       setIsScrapingVal(false)
@@ -214,6 +216,7 @@ export default function UserPage() {
       // setNewLead(0)
       setScrapCompVal("Stop Scrap")
       setIsScraping(true)
+      setScrapError(false)
       setIsScrapingComp(false)
       setIsScrapingVal(true)
       socket.emit("get_comp_scrap", {
@@ -296,6 +299,10 @@ export default function UserPage() {
       toast.success('fetched data leads');
       toast.dismiss();
     });
+
+    socket.on("scrap_error", () => {
+      setScrapError(true)
+    });
   }, [data, fileName, toastView, fileData, scrapCompVal, scrapVal, isFile]);
 
   return (
@@ -316,6 +323,9 @@ export default function UserPage() {
             }
             {
               (notFoundLead <=0 ) ? null : <div><span style={{color:"red", fontWeight:"bold"}}>{notFoundLead}</span> companies to review</div> 
+            }
+            {
+              (!scrapError) ? null : <div><span style={{color:"white", fontWeight:"bold", backgroundColor: "red"}}>{notFoundLead}</span> Error 429 : Too Many Requests</div> 
             }
           </Stack>
 
