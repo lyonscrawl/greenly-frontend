@@ -94,7 +94,7 @@ export default function UserPage() {
   const [isScrapingComp, setIsScrapingComp] = useState(false)
   const [scrapError, setScrapError] = useState(false)
   const inputRef = useRef(null)
-  const [scrapVal, setScrapVal] = useState("Scrap companies + POC")
+  const [scrapVal, setScrapVal] = useState("Scrap companies & PoC")
   const [scrapCompVal, setScrapCompVal] = useState("Scrap companies")
   const [debVal, setDebVal] = useState(0)
 
@@ -189,7 +189,7 @@ export default function UserPage() {
 
   // SCRAP
   const getScrap = () => {
-    if(scrapVal === "Scrap companies + POC"){
+    if(scrapVal === "Scrap companies & PoC"){
       // setData([])
       // setNewLead(0)
       setScrapVal("Stop Scrap")
@@ -205,7 +205,7 @@ export default function UserPage() {
       toastView = toast.loading('Scraping new leads of ' + selectedOption + '...\nThis can take a while, about 3 hours !')
     } else {
       socket.emit("stop_scrap")
-      setScrapVal("Scrap companies + POC")
+      setScrapVal("Scrap companies & PoC")
       setIsScraping(false)
       setIsScrapingComp(false)
       setIsScrapingVal(false)
@@ -291,7 +291,7 @@ export default function UserPage() {
     
     socket.on("scrap_end", () => {
       setScrapCompVal("Scrap companies")
-      setScrapVal("Scrap companies + POC")
+      setScrapVal("Scrap companies & PoC")
       setIsScraping(false)
       setIsScrapingComp(false)
       setIsScrapingVal(false)
