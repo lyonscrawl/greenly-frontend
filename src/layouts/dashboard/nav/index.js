@@ -112,7 +112,7 @@ export default function Nav({ openNav, onCloseNav }) {
             © Greenly, 2023
           </Button>
           <Button color='error' target="_blank" variant="outlined" onClick={() => {socket.disconnect(); navigate('/');}}>
-            Se Déconnecter
+            Sign out
           </Button>
         </Stack>
       </Box>

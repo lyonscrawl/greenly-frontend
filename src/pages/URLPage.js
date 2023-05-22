@@ -47,7 +47,7 @@ const tableIcons = {
   ThirdStateCheck: forwardRef((props, ref) => <Remove {...props} ref={ref} />),
   ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />)
 };
-const options = ["SBTI", "CDP", "Ecovadis", "B-Corp", "Test 5 of SBTI"];
+const options = ["SBTI", "CDP", "Ecovadis", "B-Corp"/*, "Test 5 of SBTI"*/];
 const optionsICP = ["All - P1 + P2 + P3", "P1 - Persona Sustainability", "P2 - Persona CEO/COO/Legal", "P3 - Persona RH & Marketing"];
 // const ENDPOINT = "http://localhost:8080";
 const ENDPOINT = "https://greenly-backend.onrender.com"
@@ -60,21 +60,23 @@ export default function UserPage() {
   let toastView
 
   const colDefs = [
-    { title: "URL", field: "URL", lookup: { "SBTI": options[0], "CDP": options[1], "Ecovadis": options[2], "B-Corp": options[3], "Test 5 of SBTI": options[4] } },
+    { title: "URL", field: "URL", lookup: { "SBTI": options[0], "CDP": options[1], "Ecovadis": options[2], "B-Corp": options[3], /*"Test 5 of SBTI": options[4]*/ } },
     { title: "isNew", field: "isNew", lookup: { "yes": "New", "": "Old", "notfound": "Not Found" } },
-    { title: "Entreprise", field: "Entreprise", filtering: false },
-    { title: "Localisation", field: "Localisation" },
-    { title: "Geographie Greenly", field: "Geographie Greenly" },
-    { title: "Industrie", field: "Industrie"},
-    { title: "Taille", field: "Taille" },
-    { title: "URL Linkedin", field: "URL Linkedin", filtering: false },
-    { title: "Prenom", field: "Prenom" },
-    { title: "Nom", field: "Nom" },
-    { title: "Poste", field: "Poste" },
-    { title: "Profil Linkedin", field: "Profil Linkedin", filtering: false },
-    { title: "Domaine Web", field: "Domaine Web", filtering: false },
+    { title: "Persona", field: "Persona", filtering: false },
+    { title: "Rank", field: "Rank", filtering: false },
+    { title: "Company", field: "Company", filtering: false },
+    { title: "Location", field: "Location" },
+    { title: "Greenly Geography", field: "Greenly Geography" },
+    { title: "Industry", field: "Industry"},
+    { title: "Size", field: "Size" },
+    { title: "Linkedin URL", field: "Linkedin URL", filtering: false },
+    { title: "Firstname", field: "Firstname" },
+    { title: "Lastname", field: "Lastname" },
+    { title: "Position", field: "Position" },
+    { title: "Linkedin Profile", field: "Linkedin Profile", filtering: false },
+    { title: "Web Domain", field: "Web Domain", filtering: false },
     { title: "Email", field: "Email", filtering: false },
-    { title: "Telephone", field: "Telephone", filtering: false },
+    { title: "Phone", field: "Phone", filtering: false },
   ]
   const columns = colDefs.map((column) => {
     return { ...column };
@@ -92,7 +94,7 @@ export default function UserPage() {
   const [isScrapingComp, setIsScrapingComp] = useState(false)
   const [scrapError, setScrapError] = useState(false)
   const inputRef = useRef(null)
-  const [scrapVal, setScrapVal] = useState("Scrap datas")
+  const [scrapVal, setScrapVal] = useState("Scrap companies + POC")
   const [scrapCompVal, setScrapCompVal] = useState("Scrap companies")
   const [debVal, setDebVal] = useState(0)
 
@@ -170,6 +172,7 @@ export default function UserPage() {
       tmp.forEach((item) => { (item.isNew === "Not Found") ? item.isNew="notfound" : item.isNew = ""})
       setData(tmp)
       setFileData(tmp)
+      if(tmp.length > 0) setDebVal(tmp[tmp.length - 1]["Rank"])
     }
 
     if (file) {
@@ -186,7 +189,7 @@ export default function UserPage() {
 
   // SCRAP
   const getScrap = () => {
-    if(scrapVal === "Scrap datas"){
+    if(scrapVal === "Scrap companies + POC"){
       // setData([])
       // setNewLead(0)
       setScrapVal("Stop Scrap")
@@ -202,7 +205,7 @@ export default function UserPage() {
       toastView = toast.loading('Scraping new leads of ' + selectedOption + '...\nThis can take a while, about 3 hours !')
     } else {
       socket.emit("stop_scrap")
-      setScrapVal("Scrap datas")
+      setScrapVal("Scrap companies + POC")
       setIsScraping(false)
       setIsScrapingComp(false)
       setIsScrapingVal(false)
@@ -288,7 +291,7 @@ export default function UserPage() {
     
     socket.on("scrap_end", () => {
       setScrapCompVal("Scrap companies")
-      setScrapVal("Scrap datas")
+      setScrapVal("Scrap companies + POC")
       setIsScraping(false)
       setIsScrapingComp(false)
       setIsScrapingVal(false)
@@ -308,7 +311,7 @@ export default function UserPage() {
   return (
     <>
       <Helmet>
-        <title> Accueil </title>
+        <title> Home </title>
       </Helmet>
 
       <div>
@@ -381,7 +384,7 @@ export default function UserPage() {
             </Button>
             
             <Button onClick={viderTable} variant="contained" disabled={isScraping} color="warning" startIcon={<Iconify icon="gridicons:trash" />}>
-              Vider
+              Empty
             </Button>
           </Stack>
         </Stack>

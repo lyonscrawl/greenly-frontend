@@ -46,7 +46,7 @@ export default function LoginPage() {
   return (
     <>
       <Helmet>
-        <title> Connexion </title>
+        <title> Login </title>
       </Helmet>
 
       <StyledRoot>
