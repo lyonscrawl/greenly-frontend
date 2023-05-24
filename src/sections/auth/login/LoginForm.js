@@ -20,7 +20,7 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
 
   const handleClick = () => {
-    console.log(email, password)
+    // console.log(email, password)
     socket.emit("signin", {
       "email" : email,
       "password" : password,
@@ -31,7 +31,7 @@ export default function LoginForm() {
   // USE EFFECT
   useEffect(() => {
     socket.on("signin_result", ({signin_result, id}) => {
-      console.log(socket.id, id)
+      // console.log(socket.id, id)
       if(socket.id === id){
         if(signin_result === 0){
           navigate('/dashboard');

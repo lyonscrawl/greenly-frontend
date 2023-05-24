@@ -241,11 +241,12 @@ export default function UserPage() {
   // USE EFFECT
   useEffect(() => {
     socket.on("scrap_result", ({result, deb}) => {
+      // console.log(deb, result, data)
       if(result.length !== 0){
         const uniqueValues = result.filter(arr22Item => {
           return !data.some(arr11Item => {
             return arr22Item.URL === arr11Item.URL &&
-                   arr22Item.Entreprise === arr11Item.Entreprise 
+                   arr22Item.Company === arr11Item.Company 
                   // && arr22Item["URL Linkedin"] === arr11Item["URL Linkedin"]
                   //  arr22Item.Industrie === arr11Item.Industrie 
                   // && arr22Item.isNew === arr11Item.isNew
@@ -455,7 +456,7 @@ export default function UserPage() {
                 cellStyle: {},
                 onCellEditApproved: (newValue, oldValue, rowData, columnDef) => {
                     return new Promise((resolve, reject) => {
-                        console.log('newValue: ' + newValue);
+                        // console.log('newValue: ' + newValue);
                         setTimeout(resolve, 10);
                     });
                 }
