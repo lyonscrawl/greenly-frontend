@@ -93,6 +93,7 @@ export default function UserPage() {
   const [isScrapingVal, setIsScrapingVal] = useState(false)
   const [isScrapingComp, setIsScrapingComp] = useState(false)
   const [scrapError, setScrapError] = useState(false)
+  const [scrapErrorVal, setScrapErrorVal] = useState({text: "", code:""})
   const inputRef = useRef(null)
   const [scrapVal, setScrapVal] = useState("Scrap companies & PoC")
   const [scrapCompVal, setScrapCompVal] = useState("Scrap companies")
@@ -304,8 +305,9 @@ export default function UserPage() {
       toast.dismiss();
     });
 
-    socket.on("scrap_error", () => {
+    socket.on("scrap_error", ({text, code}) => {
       setScrapError(true)
+      setScrapErrorVal({text: text, code: code})
     });
   }, [data, fileName, toastView, fileData, scrapCompVal, scrapVal, isFile]);
 
@@ -404,7 +406,7 @@ export default function UserPage() {
                   (notFoundLead <=0 ) ? null : <div style={{ marginRight:10}}><span style={{color:"red", fontWeight:"bold"}}>{notFoundLead}</span> companies to review</div> 
                 }
                 {
-                  (!scrapError) ? null : <div style={{ marginRight:10}}><span style={{color:"white", fontWeight:"bold", backgroundColor: "red"}}>{"Error 429 : Too Many Requests"}</span></div> 
+                  (!scrapError) ? null : <div style={{ marginRight:10}}><span style={{color:"white", fontWeight:"bold", backgroundColor: "red"}}>{"Error " + scrapErrorVal.code + " : " + scrapErrorVal.text}</span></div> 
                 }
               </Stack>
             }
